@@ -1,0 +1,95 @@
+name: Increment Version and Create Tag
+
+on:
+  workflow_dispatch:
+      inputs:
+        changelog_description:
+          description: 'Changelog description'
+          required: true
+        increment_type:
+          description: 'Choose the version increment type'
+          required: true
+          default: 'patch (+ 0.0.1)'
+          type: choice
+          options:
+            - 'patch (+ 0.0.1)'
+            - 'minor (+ 0.1.0)'
+            - 'major (+ 1.0.0)'
+
+jobs:
+  increment-version:
+    runs-on: [self-hosted, linode]
+    env:
+      env_name: map
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up input values
+        run: |
+          if [ -z "${{ github.event.inputs.increment_type }}" ]; then
+            INCREMENT_TYPE="patch (+ 0.0.1)"
+          else
+            INCREMENT_TYPE="${{ github.event.inputs.increment_type }}"
+          fi
+          echo "INCREMENT_TYPE=$INCREMENT_TYPE" >> $GITHUB_ENV
+
+          if [ -z "${{ github.event.inputs.changelog_description }}" ]; then
+            CHANGELOG_DESCRIPTION="Default changelog description"
+          else
+            CHANGELOG_DESCRIPTION="${{ github.event.inputs.changelog_description }}"
+          fi
+          echo "CHANGELOG_DESCRIPTION=$CHANGELOG_DESCRIPTION" >> $GITHUB_ENV
+
+      - name: Use input values or defaults
+        run: |
+          echo "Increment type: ${{ env.INCREMENT_TYPE }}"
+          echo "Changelog description: ${{ env.CHANGELOG_DESCRIPTION }}"
+
+      - name: Set Increment Type
+        run: |
+          INCREMENT_TYPE=$(echo '${{ env.INCREMENT_TYPE }}' | awk '{print $1}')
+          echo "INCREMENT_TYPE=$INCREMENT_TYPE" >> $GITHUB_ENV
+          echo "Increment Type: $INCREMENT_TYPE"
+
+      - name: Increment version in pyproject.toml
+        run: |
+          eval "$(conda shell.bash hook)"
+          conda activate ${{ env.env_name }}
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          bumpver update --${{ env.INCREMENT_TYPE }}
+
+      - name: Update release notes in README.md
+        run: |
+          eval "$(conda shell.bash hook)"
+          conda activate ${{ env.env_name }}
+          VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'=' '{print $2}' | tr -d ' "')
+          python update_release_notes.py ${{ env.INCREMENT_TYPE }} "${VERSION}" "${{ env.CHANGELOG_DESCRIPTION }}"
+          git add README.md
+
+      - name: Update VERSION in README.md
+        run: |
+          VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'=' '{print $2}' | tr -d ' "')
+          sed -i "s/^VERSION: .*/VERSION: ${VERSION}/" README.md
+          git add README.md
+
+      - name: Update __version__ in __init__.py
+        run: |
+          VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'=' '{print $2}' | tr -d ' "')
+          INIT_FILE="map/__init__.py"
+          sed -i "s/^__version__ = .*/__version__ = \"${VERSION}\"/" "${INIT_FILE}"
+          git add "${INIT_FILE}"
+
+      - name: Commit and tag the version bump
+        run: |
+          git add pyproject.toml
+          VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'=' '{print $2}' | tr -d ' "')
+          TAG_NAME="v${VERSION}"
+          git commit -m "Bump version to ${VERSION}"
+          git tag -d "${TAG_NAME}" 2>/dev/null || true
+          git tag "${TAG_NAME}"
+          git remote remove origin
+          git remote add origin "git@github.com:nrahnemoon/Map.git"
+          git push --set-upstream origin HEAD
+          git push origin "${TAG_NAME}"
