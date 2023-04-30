@@ -1,0 +1,54 @@
+name: Install
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  install:
+    runs-on: [self-hosted, linode]
+    env:
+      env_name: map
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache Miniconda
+      uses: actions/cache@v2
+      id: cache-miniconda
+      with:
+        path: ~/miniconda
+        key: miniconda-${{ runner.os }}-${{ hashFiles('**/install-miniconda.sh') }}
+
+    - name: Install Miniconda
+      if: steps.cache-miniconda.outputs.cache-hit != 'true'
+      run: |
+        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O install-miniconda.sh
+        [ ! -d "$HOME/miniconda" ] && bash install-miniconda.sh -b -p $HOME/miniconda || bash install-miniconda.sh -u -b -p $HOME/miniconda
+
+    - name: Set PATH and Install Poetry
+      run: |
+        echo "$HOME/miniconda/bin" >> $GITHUB_PATH
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Cache Conda environment
+      uses: actions/cache@v2
+      id: cache-conda
+      with:
+        path: ~/.conda/envs/${{ env.env_name }}
+        key: ${{ runner.os }}-conda-${{ env.env_name }}-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-conda-${{ env.env_name }}-
+
+    - name: Create Conda environment if Needed
+      if: steps.cache-conda.outputs.cache-hit != 'true'
+      run: conda create --name ${{ env.env_name }} python=3.9
+
+    - name: Activate environment, Install and Upgrade packages
+      run: |
+        eval "$(conda shell.bash hook)"
+        conda activate ${{ env.env_name }}
+        if [ "${{ steps.cache-conda.outputs.cache-hit }}" != 'true' ]; then
+          poetry install
+        fi
