@@ -1,6 +1,6 @@
 ## Overview
 
-VERSION: 0.2.0
+VERSION: 0.0.0
 
 API Client for accessing data from Google Maps, Apple Maps, OpenStreetMaps and PropertyRadar maps.
 
@@ -101,6 +101,3 @@ pip install --upgrade -e .[dev]
 ```
 
 ## Release Notes
-
-
-*0.2.0* (2023-04-30) Initial version
