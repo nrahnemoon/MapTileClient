@@ -4,7 +4,7 @@ based on the increment type, version, and description, and writing the updated r
 back to the file.
 
 Usage:
-    python update_release_notes.py <increment_type> <version> <description>
+    python update_release_notes.py <version> <description>
 
 Example:
     python update_release_notes.py minor "0.1.0" "Added a new feature"
@@ -13,7 +13,7 @@ Example:
 import sys
 import datetime
 
-def update_release_notes(increment_type, version, description):
+def update_release_notes(version, description):
     with open('README.md', 'r') as f:
         readme_contents = f.readlines()
 
@@ -57,7 +57,7 @@ def update_release_notes(increment_type, version, description):
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("Usage: python update_release_notes.py <INCREMENT_TYPE> <VERSION> <CHANGELOG_DESCRIPTION>")
+        print("Usage: python update_release_notes.py <VERSION> <CHANGELOG_DESCRIPTION>")
         sys.exit(1)
 
-    update_release_notes(sys.argv[1], sys.argv[2], sys.argv[3])
+    update_release_notes(sys.argv[1], sys.argv[2])

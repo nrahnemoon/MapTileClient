@@ -82,7 +82,7 @@ jobs:
           eval "$(conda shell.bash hook)"
           conda activate ${{ github.event.repository.name }}
           VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'=' '{print $2}' | tr -d ' "')
-          python update_release_notes.py ${{ env.INCREMENT_TYPE }} "${VERSION}" "${{ env.CHANGELOG_DESCRIPTION }}"
+          python ./github/scripts/update_release_notes.py "${VERSION}" "${{ env.CHANGELOG_DESCRIPTION }}"
           git add README.md
 
       - name: Update VERSION in README.md
