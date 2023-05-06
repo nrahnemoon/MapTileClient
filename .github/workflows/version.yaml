@@ -72,7 +72,7 @@ jobs:
       - name: Increment version in pyproject.toml
         run: |
           eval "$(conda shell.bash hook)"
-          conda activate ${{ github.event.inputs.increment_type }}
+          conda activate ${{ github.event.repository.name }}
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           bumpver update --${{ env.INCREMENT_TYPE }}
@@ -80,7 +80,7 @@ jobs:
       - name: Update release notes in README.md
         run: |
           eval "$(conda shell.bash hook)"
-          conda activate ${{ github.event.inputs.increment_type }}
+          conda activate ${{ github.event.repository.name }}
           VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'=' '{print $2}' | tr -d ' "')
           python update_release_notes.py ${{ env.INCREMENT_TYPE }} "${VERSION}" "${{ env.CHANGELOG_DESCRIPTION }}"
           git add README.md

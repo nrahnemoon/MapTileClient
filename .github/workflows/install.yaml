@@ -34,19 +34,19 @@ jobs:
       uses: actions/cache@v2
       id: cache-conda
       with:
-        path: ~/.conda/envs/${{ github.event.inputs.increment_type }}
-        key: ${{ runner.os }}-conda-${{ github.event.inputs.increment_type }}-${{ hashFiles('**/pyproject.toml') }}
+        path: ~/.conda/envs/${{ github.event.repository.name }}
+        key: ${{ runner.os }}-conda-${{ github.event.repository.name }}-${{ hashFiles('**/pyproject.toml') }}
         restore-keys: |
-          ${{ runner.os }}-conda-${{ github.event.inputs.increment_type }}-
+          ${{ runner.os }}-conda-${{ github.event.repository.name }}-
 
     - name: Create Conda environment if Needed
       if: steps.cache-conda.outputs.cache-hit != 'true'
-      run: conda create --name ${{ github.event.inputs.increment_type }} python=3.9
+      run: conda create --name ${{ github.event.repository.name }} python=3.9
 
     - name: Activate environment, Install and Upgrade packages
       run: |
         eval "$(conda shell.bash hook)"
-        conda activate ${{ github.event.inputs.increment_type }}
+        conda activate ${{ github.event.repository.name }}
         if [ "${{ steps.cache-conda.outputs.cache-hit }}" != 'true' ]; then
           poetry install
         fi
