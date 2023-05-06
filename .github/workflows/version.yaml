@@ -19,20 +19,23 @@ on:
 jobs:
   increment-version:
     runs-on: [self-hosted, linode]
-    env:
-      env_name: map
+    with:
+      ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Set up input values
         run: |
           if [ -z "${{ github.event.inputs.increment_type }}" ]; then
-            INCREMENT_TYPE="patch (+ 0.0.1)"
+            INCREMENT_VALUE="patch (+ 0.0.1)"
           else
-            INCREMENT_TYPE="${{ github.event.inputs.increment_type }}"
+            INCREMENT_VALUE="${{ github.event.inputs.increment_type }}"
           fi
-          echo "INCREMENT_TYPE=$INCREMENT_TYPE" >> $GITHUB_ENV
+          echo "INCREMENT_VALUE=$INCREMENT_VALUE" >> $GITHUB_ENV
 
           if [ -z "${{ github.event.inputs.changelog_description }}" ]; then
             CHANGELOG_DESCRIPTION="Default changelog description"
@@ -48,14 +51,30 @@ jobs:
 
       - name: Set Increment Type
         run: |
-          INCREMENT_TYPE=$(echo '${{ env.INCREMENT_TYPE }}' | awk '{print $1}')
+          INCREMENT_TYPE=$(echo '${{ env.INCREMENT_VALUE }}' | awk '{print $1}')
           echo "INCREMENT_TYPE=$INCREMENT_TYPE" >> $GITHUB_ENV
-          echo "Increment Type: $INCREMENT_TYPE"
+
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF})" >> $GITHUB_ENV
+
+      - name: Debug
+        run: |
+          echo ${{ env.BRANCH_NAME }}
+          echo "Increment value: ${{ env.INCREMENT_VALUE }}"
+          echo "Increment type: ${{ env.INCREMENT_TYPE }}"
+          echo "Changelog description: ${{ env.CHANGELOG_DESCRIPTION }}"
 
       - name: Increment version in pyproject.toml
         run: |
           eval "$(conda shell.bash hook)"
-          conda activate ${{ env.env_name }}
+          conda activate ${{ github.event.inputs.increment_type }}
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           bumpver update --${{ env.INCREMENT_TYPE }}
@@ -63,7 +82,7 @@ jobs:
       - name: Update release notes in README.md
         run: |
           eval "$(conda shell.bash hook)"
-          conda activate ${{ env.env_name }}
+          conda activate ${{ github.event.inputs.increment_type }}
           VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'=' '{print $2}' | tr -d ' "')
           python update_release_notes.py ${{ env.INCREMENT_TYPE }} "${VERSION}" "${{ env.CHANGELOG_DESCRIPTION }}"
           git add README.md
@@ -81,15 +100,14 @@ jobs:
           sed -i "s/^__version__ = .*/__version__ = \"${VERSION}\"/" "${INIT_FILE}"
           git add "${INIT_FILE}"
 
-      - name: Commit and tag the version bump
+      - name: Handle github tag and commit
         run: |
-          git add pyproject.toml
           VERSION=$(grep -E '^version\s*=' pyproject.toml | awk -F'=' '{print $2}' | tr -d ' "')
           TAG_NAME="v${VERSION}"
+
+          git add -u
           git commit -m "Bump version to ${VERSION}"
-          git tag -d "${TAG_NAME}" 2>/dev/null || true
+
+          git push origin "${{ env.BRANCH_NAME }}"
           git tag "${TAG_NAME}"
-          git remote remove origin
-          git remote add origin "git@github.com:nrahnemoon/Map.git"
-          git push --set-upstream origin HEAD
           git push origin "${TAG_NAME}"

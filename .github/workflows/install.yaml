@@ -7,8 +7,6 @@ on:
 jobs:
   install:
     runs-on: [self-hosted, linode]
-    env:
-      env_name: map
 
     steps:
     - uses: actions/checkout@v2
@@ -36,19 +34,19 @@ jobs:
       uses: actions/cache@v2
       id: cache-conda
       with:
-        path: ~/.conda/envs/${{ env.env_name }}
-        key: ${{ runner.os }}-conda-${{ env.env_name }}-${{ hashFiles('**/pyproject.toml') }}
+        path: ~/.conda/envs/${{ github.event.inputs.increment_type }}
+        key: ${{ runner.os }}-conda-${{ github.event.inputs.increment_type }}-${{ hashFiles('**/pyproject.toml') }}
         restore-keys: |
-          ${{ runner.os }}-conda-${{ env.env_name }}-
+          ${{ runner.os }}-conda-${{ github.event.inputs.increment_type }}-
 
     - name: Create Conda environment if Needed
       if: steps.cache-conda.outputs.cache-hit != 'true'
-      run: conda create --name ${{ env.env_name }} python=3.9
+      run: conda create --name ${{ github.event.inputs.increment_type }} python=3.9
 
     - name: Activate environment, Install and Upgrade packages
       run: |
         eval "$(conda shell.bash hook)"
-        conda activate ${{ env.env_name }}
+        conda activate ${{ github.event.inputs.increment_type }}
         if [ "${{ steps.cache-conda.outputs.cache-hit }}" != 'true' ]; then
           poetry install
         fi
