@@ -58,17 +58,17 @@ To install the package in a new Conda environment for production use, follow the
 1. Create a new Conda environment:
 
 ```
-conda create --name map python=3.9
+conda create --name map_tile_client python=3.9
 ```
 
 2. Activate the environment:
 ```
-conda activate map
+conda activate map_tile_client
 ```
 
 3. Install the package directly from the GitHub repository:
 ```
-pip install git+ssh://git@github.com/nrahnemoon/Map.git
+pip install git+ssh://git@github.com/nrahnemoon/MapTileClient.git
 ```
 
 ## Development Environment Installation
@@ -77,22 +77,22 @@ To set up the development environment, follow these steps:
 
 1. Clone the repository:
 ```
-git clone git@github.com:nrahnemoon/Map.git
+git clone git@github.com:nrahnemoon/MapTileClient.git
 ```
 
 2. Change to the repository directory:
 ```
-cd Map
+cd MapTileClient
 ```
 
 3. Create a new Conda environment:
 ```
-conda create --name map python=3.9
+conda create --name map_tile_client python=3.9
 ```
 
 4. Activate the environment:
 ```
-conda activate map
+conda activate map_tile_client
 ```
 
 5. Install the package in development mode with dev extras:
@@ -101,6 +101,5 @@ poetry install
 ```
 
 ## Release Notes
-
 
 *0.1.0* (2023-04-30) Initial version

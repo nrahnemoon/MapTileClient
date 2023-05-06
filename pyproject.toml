@@ -1,15 +1,20 @@
 [tool.poetry]
-name = "map"
+name = "map_tile_client"
 version = "0.1.0"
 description = ""
 authors = ["Nima Rahnemoon <nrahnemoon@gmail.com>"]
 readme = "README.md"
-packages = [{include = "map"}]
+packages = [{include = "map_tile_client"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.12"
 numpy = "^1.24.2"
 requests = "^2.28.2"
+pillow = "^9.5.0"
+opencv-python = "^4.7.0.72"
+scipy = "^1.10.1"
+shapely = "^2.0.1"
+mapbox-vector-tile = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.2"
@@ -38,6 +43,6 @@ push            = false
 "README.md" = [
     "^VERSION: {version}$",
 ]
-"map/__init__.py" = [
+"map_tile_client/__init__.py" = [
     '^__version__ = "{version}"$',
 ]
