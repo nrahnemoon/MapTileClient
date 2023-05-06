@@ -97,7 +97,7 @@ conda activate map
 
 5. Install the package in development mode with dev extras:
 ```
-pip install --upgrade -e .[dev]
+poetry install
 ```
 
 ## Release Notes

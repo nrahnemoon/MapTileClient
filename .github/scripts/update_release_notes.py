@@ -56,7 +56,7 @@ def update_release_notes(version, description):
         f.writelines(readme_contents)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 3:
         print("Usage: python update_release_notes.py <VERSION> <CHANGELOG_DESCRIPTION>")
         sys.exit(1)
 
