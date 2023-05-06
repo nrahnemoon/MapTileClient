@@ -19,8 +19,6 @@ on:
 jobs:
   increment-version:
     runs-on: [self-hosted, linode]
-    with:
-      ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     steps:
       - name: Checkout code
