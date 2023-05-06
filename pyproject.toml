@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "map_tile_client"
+name = "map-tile-client"
 version = "0.1.0"
 description = ""
 authors = ["Nima Rahnemoon <nrahnemoon@gmail.com>"]
