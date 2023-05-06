@@ -1,6 +1,6 @@
 ## Overview
 
-VERSION: 0.1.0
+VERSION: 0.0.0
 
 API Client for accessing data from Google Maps, Apple Maps, OpenStreetMaps and PropertyRadar maps.
 
