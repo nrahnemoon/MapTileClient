@@ -1,6 +1,6 @@
 ## Overview
 
-VERSION: 0.1.3
+VERSION: 0.2.0
 
 API Client for accessing data from Google Maps, Apple Maps, OpenStreetMaps and PropertyRadar maps.
 
@@ -109,3 +109,5 @@ poetry install
 *0.1.2* (2023-05-07) Add from_map static initializer to BaseMap
 
 *0.1.3* (2023-05-07) Bugfix BaseMap not defined
+
+*0.2.0* (2023-05-07) Add get_mono_map to AppleMapsStandardMap
