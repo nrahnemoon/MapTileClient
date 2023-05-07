@@ -34,6 +34,15 @@ class BaseMap:
         self.tile_load_queue = Queue()
         self._start_tile_load_threads()
 
+    @classmethod
+    def from_map(cls, other_map: BaseMap, load_from_cache=True, save_to_cache=True):
+        curr_map = cls(
+            other_map.latitutde_deg, other_map.longitude_deg, other_map.zoom,
+            load_from_cache=load_from_cache, save_to_cache=save_to_cache
+        )
+        curr_map.load_tiles(other_map.map_tiles)
+        return curr_map
+
     @property
     @abc.abstractmethod
     def TILE_CACHE_DIR(self):
