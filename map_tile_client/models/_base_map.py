@@ -1,6 +1,7 @@
 """
 Abstract class to provide generic tile load and processing functionality.
 """
+from __future__ import annotations
 import abc
 from copy import deepcopy
 from io import BytesIO
