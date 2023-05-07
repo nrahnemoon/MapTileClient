@@ -3,13 +3,11 @@ Abstract class to provide generic tile load and processing functionality.
 """
 from __future__ import annotations
 import abc
-from copy import deepcopy
 from io import BytesIO
 import numpy as np
 import os
 from PIL import Image, ImageDraw, ImageOps
 from queue import Queue
-from random import randint
 import requests
 import threading
 import time
@@ -21,10 +19,20 @@ NUM_TILE_LOAD_THREADS = 8
 
 
 class BaseMap:
-    def __init__(self, latitude_deg, longitude_deg, zoom=20, load_from_cache=True, save_to_cache=True):
-        self.latitude_deg, self.longitude_deg, self.zoom = latitude_deg, longitude_deg, zoom
-        self.origin_tile_x, self.origin_tile_y, _ = \
-            tilemap_utils.get_tile(latitude_deg, longitude_deg, zoom)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        self.latitude_deg, self.longitude_deg, self.zoom = (
+            latitude_deg,
+            longitude_deg,
+            zoom,
+        )
+        self.origin_tile_x, self.origin_tile_y, _ = tilemap_utils.get_tile(latitude_deg, longitude_deg, zoom)
         self.origin_uv_px = tilemap_utils.get_px_on_tile(latitude_deg, longitude_deg, zoom)
         self.load_from_cache, self.save_to_cache = load_from_cache, save_to_cache
         self.num_tiles_loading = 0
@@ -34,15 +42,6 @@ class BaseMap:
         self.map_tiles = []  # (x_delta, y_delta) of tiles loaded into map
         self.tile_load_queue = Queue()
         self._start_tile_load_threads()
-
-    @classmethod
-    def from_map(cls, other_map: BaseMap, load_from_cache=True, save_to_cache=True):
-        curr_map = cls(
-            other_map.latitutde_deg, other_map.longitude_deg, other_map.zoom,
-            load_from_cache=load_from_cache, save_to_cache=save_to_cache
-        )
-        curr_map.load_tiles(other_map.map_tiles)
-        return curr_map
 
     @property
     @abc.abstractmethod
@@ -55,9 +54,14 @@ class BaseMap:
         return NotImplementedError
 
     @classmethod
-    def from_map(cls, other_map, load_tiles=True, multithread=True):
-        curr_map = cls(other_map.latitude_deg, other_map.longitude_deg, other_map.zoom,
-                       other_map.load_from_cache, other_map.save_to_cache)
+    def from_map(cls, other_map: BaseMap, load_tiles=True, multithread=True):
+        curr_map = cls(
+            other_map.latitude_deg,
+            other_map.longitude_deg,
+            other_map.zoom,
+            other_map.load_from_cache,
+            other_map.save_to_cache,
+        )
         if load_tiles:
             curr_map.load_tiles(other_map.get_tile_keys(), multithread=multithread)
         return curr_map
@@ -67,16 +71,15 @@ class BaseMap:
 
     @abc.abstractmethod
     def get_tile_url(self, x, y):
-        raise NotImplemented  # Note: zoom stored in self.zoom
+        raise NotImplementedError  # Note: zoom stored in self.zoom
 
     @abc.abstractmethod
     def get_mono_map(self):
-        raise NotImplemented  # Note: zoom stored in self.zoom
+        raise NotImplementedError  # Note: zoom stored in self.zoom
 
     def _start_tile_load_threads(self):
         for _ in range(NUM_TILE_LOAD_THREADS):
-            tile_load_thread = threading.Thread(
-                target=self._load_tile_from_queue, args=(self.tile_load_queue,))
+            tile_load_thread = threading.Thread(target=self._load_tile_from_queue, args=(self.tile_load_queue,))
             tile_load_thread.daemon = True
             tile_load_thread.start()
 
@@ -106,7 +109,7 @@ class BaseMap:
                     self.tiles[(x_delta, y_delta)].save(cache_path)
 
     def load_tiles(self, tile_keys, multithread=True):
-        for (x_delta, y_delta) in tile_keys:
+        for x_delta, y_delta in tile_keys:
             self.load_tile(x_delta, y_delta, multithread=multithread)
 
     def expand_border(self, num_tiles_expand, multithread=True):
@@ -170,8 +173,13 @@ class BaseMap:
         for (x_delta, y_delta), tile in self.tiles.items():
             if (x_delta, y_delta) in self.map_tiles:
                 continue
-            self.map.paste(tile, (256 * (x_delta + tiles_top_left_x_delta),
-                                  256 * (y_delta + tiles_top_left_y_delta)))
+            self.map.paste(
+                tile,
+                (
+                    256 * (x_delta + tiles_top_left_x_delta),
+                    256 * (y_delta + tiles_top_left_y_delta),
+                ),
+            )
             self.map_tiles.append((x_delta, y_delta))
 
         self.load_map_lock.release()
@@ -213,8 +221,11 @@ class BaseMap:
                 road_uv_px = geometry_utils.bound_line(road_uv_px, width_px, height_px)
                 if len(road_uv_px) == 0:
                     continue
-                map_draw.line([(int(x[0]), int(x[1])) for x in road_uv_px],
-                              fill=color_utils.get_color(street_name), width=8)
+                map_draw.line(
+                    [(int(x[0]), int(x[1])) for x in road_uv_px],
+                    fill=color_utils.get_color(street_name),
+                    width=8,
+                )
 
     def get_px(self, lat_deg, lon_deg):
         tile_x, tile_y, _ = tilemap_utils.get_tile(lat_deg, lon_deg, self.zoom)
@@ -229,24 +240,25 @@ class BaseMap:
         Returns the lat/lon in clockwise order, starting at the top left corner
         and ending at the bottom left corner.
         """
-        if tile_keys == None:
+        if tile_keys is None:
             tile_keys = self.tiles.keys()
         tile_indexes = [
-            (self.origin_tile_x + x_delta, self.origin_tile_y + y_delta)
-            for (x_delta, y_delta) in tile_keys
+            (self.origin_tile_x + x_delta, self.origin_tile_y + y_delta) for (x_delta, y_delta) in tile_keys
         ]
         tile_xs, tile_ys = np.array(tile_indexes).T.tolist()
-        top_left_lat_lon_deg = \
-            tilemap_utils.get_lat_lon_for_tile_px(min(tile_xs), min(tile_ys), 0.0, 0.0, self.zoom)
-        top_right_lat_lon_deg = \
-            tilemap_utils.get_lat_lon_for_tile_px(max(tile_xs), min(tile_ys), 255.0, 0.0, self.zoom)
-        bottom_right_lat_lon_deg = \
-            tilemap_utils.get_lat_lon_for_tile_px(max(tile_xs), max(tile_ys), 255.0, 255.0, self.zoom)
-        bottom_left_lat_lon_deg = \
-            tilemap_utils.get_lat_lon_for_tile_px(min(tile_xs), max(tile_ys), 0.0, 255.0, self.zoom)
+        top_left_lat_lon_deg = tilemap_utils.get_lat_lon_for_tile_px(min(tile_xs), min(tile_ys), 0.0, 0.0, self.zoom)
+        top_right_lat_lon_deg = tilemap_utils.get_lat_lon_for_tile_px(max(tile_xs), min(tile_ys), 255.0, 0.0, self.zoom)
+        bottom_right_lat_lon_deg = tilemap_utils.get_lat_lon_for_tile_px(
+            max(tile_xs), max(tile_ys), 255.0, 255.0, self.zoom
+        )
+        bottom_left_lat_lon_deg = tilemap_utils.get_lat_lon_for_tile_px(
+            min(tile_xs), max(tile_ys), 0.0, 255.0, self.zoom
+        )
         return [
-            top_left_lat_lon_deg, top_right_lat_lon_deg,
-            bottom_right_lat_lon_deg, bottom_left_lat_lon_deg
+            top_left_lat_lon_deg,
+            top_right_lat_lon_deg,
+            bottom_right_lat_lon_deg,
+            bottom_left_lat_lon_deg,
         ]
 
     def get_lat_lon_center(self):

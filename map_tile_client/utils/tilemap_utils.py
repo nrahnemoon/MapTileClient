@@ -22,7 +22,7 @@ def get_point(latitude_deg, longitude_deg):
         )
     """
     siny = min(max(math.sin(latitude_deg * degree), -0.9999), 0.9999)
-    x = 128 + longitude_deg * (256/360)
+    x = 128 + longitude_deg * (256 / 360)
     y = 128 + 0.5 * math.log((1 + siny) / (1 - siny)) * -(256 / (2 * np.pi))
     return x, y
 
@@ -71,7 +71,7 @@ def get_px_on_tile(latitude_deg, longitude_deg, zoom):
     width_of_tile = 256 / tile_divisions_per_axis
     x, y = get_point(latitude_deg, longitude_deg)
     x = (x / width_of_tile % 1.0) * 255
-    y =  (y / width_of_tile % 1.0) * 255
+    y = (y / width_of_tile % 1.0) * 255
     return x, y
 
 

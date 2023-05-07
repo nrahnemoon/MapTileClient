@@ -22,14 +22,28 @@ def get_closest_point_on_edge(edge_uv_px, point_uv_px):
             (float): distance from the test point to the closest point
     """
     for i, edge_segment_uv_px in enumerate(zip(edge_uv_px[:-1], edge_uv_px[1:])):
-        closest_point_uv_px, percent_distance = \
-            get_closest_point_on_edge_segment(edge_segment_uv_px, point_uv_px)
+        closest_point_uv_px, percent_distance = get_closest_point_on_edge_segment(edge_segment_uv_px, point_uv_px)
         if percent_distance >= 0 and percent_distance <= 1:
-            return closest_point_uv_px, i, percent_distance, math.dist(point_uv_px, closest_point_uv_px)
+            return (
+                closest_point_uv_px,
+                i,
+                percent_distance,
+                math.dist(point_uv_px, closest_point_uv_px),
+            )
         elif i == 0 and percent_distance < 0:
-            return edge_segment_uv_px[0], i, 0.0, math.dist(point_uv_px, edge_segment_uv_px[0])
+            return (
+                edge_segment_uv_px[0],
+                i,
+                0.0,
+                math.dist(point_uv_px, edge_segment_uv_px[0]),
+            )
         elif i == len(edge_uv_px) - 2 and percent_distance > 1:
-            return edge_segment_uv_px[-1], i, 1.0, math.dist(point_uv_px, edge_segment_uv_px[-1])
+            return (
+                edge_segment_uv_px[-1],
+                i,
+                1.0,
+                math.dist(point_uv_px, edge_segment_uv_px[-1]),
+            )
 
     distances_px = [math.dist(edge_point_uv_px, point_uv_px) for edge_point_uv_px in edge_uv_px]
     min_index = distances_px.index(min(distances_px))
@@ -48,8 +62,10 @@ def get_closest_point_on_edge_segment(edge_segment_uv_px, point_uv_px):
         )
     """
     [[x1, y1], [x2, y2]], [a, b] = edge_segment_uv_px, point_uv_px
-    if x1 == x2: return (x1, b)
-    if y1 == y2: return (a, y1)
+    if x1 == x2:
+        return (x1, b)
+    if y1 == y2:
+        return (a, y1)
     m1 = (y2 - y1) / (x2 - x1)
     m2 = -1 / m1
     x = (m1 * x1 - m2 * a + b - y1) / (m1 - m2)
@@ -63,30 +79,41 @@ def get_pct_along_edge_segment(edge_segment_uv_px, point_uv_px):
     along the line segment that the point lies.
     """
     [[x1, y1], [x2, y2]], [x, y] = edge_segment_uv_px, point_uv_px
-    edge_length_px = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-    dist_to_start_px = math.sqrt((x - x1)**2 + (y - y1)**2)
-    dist_to_end_px = math.sqrt((x - x2)**2 + (y - y2)**2)
-    is_neg = dist_to_end_px > dist_to_start_px and  dist_to_end_px > edge_length_px
+    edge_length_px = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    dist_to_start_px = math.sqrt((x - x1) ** 2 + (y - y1) ** 2)
+    dist_to_end_px = math.sqrt((x - x2) ** 2 + (y - y2) ** 2)
+    is_neg = dist_to_end_px > dist_to_start_px and dist_to_end_px > edge_length_px
     pct_dist_px = dist_to_start_px / edge_length_px
     return -pct_dist_px if is_neg else pct_dist_px
 
 
 def get_overlaps(edge1_uv_px, edge2_uv_px):
     overlaps = []
-    merged_edges = []
     curr_overlap = None
     for edge2_index, point2_uv_px in enumerate(edge2_uv_px):
-        closest_point_uv_px, edge1_index, pct, dist_px = \
-            get_closest_point_on_edge(edge1_uv_px, point2_uv_px)
+        closest_point_uv_px, edge1_index, pct, dist_px = get_closest_point_on_edge(edge1_uv_px, point2_uv_px)
         if dist_px > 0.1:
             if curr_overlap is not None:  # End of overlap
                 prev_edge2_segment_uv_px = edge2_uv_px[(edge2_index - 1):(edge2_index + 1)]
-                closest_point_uv_px, _, pct, dist_px = \
-                    get_closest_point_on_edge(prev_edge2_segment_uv_px, edge1_uv_px[edge1_index + 1])
+                closest_point_uv_px, _, pct, dist_px = get_closest_point_on_edge(
+                    prev_edge2_segment_uv_px, edge1_uv_px[edge1_index + 1]
+                )
                 if (edge1_index + 1) == len(edge1_uv_px) - 1:
-                    curr_overlap.append([closest_point_uv_px, (edge1_index, 1.0), (edge2_index - 1, pct)])
+                    curr_overlap.append(
+                        [
+                            closest_point_uv_px,
+                            (edge1_index, 1.0),
+                            (edge2_index - 1, pct),
+                        ]
+                    )
                 else:
-                    curr_overlap.append([closest_point_uv_px, (edge1_index + 1, 0.0), (edge2_index - 1, pct)])
+                    curr_overlap.append(
+                        [
+                            closest_point_uv_px,
+                            (edge1_index + 1, 0.0),
+                            (edge2_index - 1, pct),
+                        ]
+                    )
                 overlaps.append(curr_overlap)
                 curr_overlap = None
             continue
@@ -113,7 +140,9 @@ def merge_edges(edges_uv_px):
     contours = []
     for contour in cv2.findContours(np.array(image), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)[0]:
         contour = [[pt[0] / 10.0, pt[1] / 10.0] for pt in contour.reshape(contour.shape[0], 2).tolist()]
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
         contours.append(np.array(LineString(contour).simplify(1.0).coords.xy).T.tolist()[:-1])
 
     image = Image.new("L", (math.ceil(width_px), math.ceil(height_px)))
@@ -126,57 +155,54 @@ def merge_edges(edges_uv_px):
 
 
 def min_distance(A, B, E):
- 
     # vector AB
-    AB = [None, None];
-    AB[0] = B[0] - A[0];
-    AB[1] = B[1] - A[1];
- 
+    AB = [None, None]
+    AB[0] = B[0] - A[0]
+    AB[1] = B[1] - A[1]
+
     # vector BP
-    BE = [None, None];
-    BE[0] = E[0] - B[0];
-    BE[1] = E[1] - B[1];
- 
+    BE = [None, None]
+    BE[0] = E[0] - B[0]
+    BE[1] = E[1] - B[1]
+
     # vector AP
-    AE = [None, None];
-    AE[0] = E[0] - A[0];
-    AE[1] = E[1] - A[1];
- 
+    AE = [None, None]
+    AE[0] = E[0] - A[0]
+    AE[1] = E[1] - A[1]
+
     # Variables to store dot product
- 
+
     # Calculating the dot product
-    AB_BE = AB[0] * BE[0] + AB[1] * BE[1];
-    AB_AE = AB[0] * AE[0] + AB[1] * AE[1];
- 
+    AB_BE = AB[0] * BE[0] + AB[1] * BE[1]
+    AB_AE = AB[0] * AE[0] + AB[1] * AE[1]
+
     # Minimum distance from
     # point E to the line segment
-    reqAns = 0;
- 
+    reqAns = 0
+
     # Case 1
-    if (AB_BE > 0) :
- 
+    if AB_BE > 0:
         # Finding the magnitude
-        y = E[1] - B[1];
-        x = E[0] - B[0];
-        reqAns = math.sqrt(x * x + y * y);
- 
+        y = E[1] - B[1]
+        x = E[0] - B[0]
+        reqAns = math.sqrt(x * x + y * y)
+
     # Case 2
-    elif (AB_AE < 0) :
-        y = E[1] - A[1];
-        x = E[0] - A[0];
-        reqAns = math.sqrt(x * x + y * y);
- 
+    elif AB_AE < 0:
+        y = E[1] - A[1]
+        x = E[0] - A[0]
+        reqAns = math.sqrt(x * x + y * y)
+
     # Case 3
     else:
- 
         # Finding the perpendicular distance
-        x1 = AB[0];
-        y1 = AB[1];
-        x2 = AE[0];
-        y2 = AE[1];
-        mod = math.sqrt(x1 * x1 + y1 * y1);
-        reqAns = abs(x1 * y2 - y1 * x2) / mod;
-     
+        x1 = AB[0]
+        y1 = AB[1]
+        x2 = AE[0]
+        y2 = AE[1]
+        mod = math.sqrt(x1 * x1 + y1 * y1)
+        reqAns = abs(x1 * y2 - y1 * x2) / mod
+
     return reqAns
 
 
@@ -223,7 +249,7 @@ def get_image_bounds(image_width_px, image_height_px):
         [image_width_px - 1.0, 0.0],
         [image_width_px - 1.0, image_height_px - 1.0],
         [0.0, image_height_px - 1.0],
-        [0.0, 0.0]
+        [0.0, 0.0],
     ]
 
 
@@ -275,10 +301,12 @@ def compute_intersection_2d(edge1: np.ndarray, edge2: np.ndarray):
     n3 = edge1_dims[0] * edge2_dims[1] - edge1_dims[1] * edge2_dims[0]
     if math.isclose(n3, 0, abs_tol=EPSILON):
         return None
-    return np.array([
-        (n1 * edge2_dims[0] - n2 * edge1_dims[0]) * (1.0 / n3),
-        (n1 * edge2_dims[1] - n2 * edge1_dims[1]) * (1.0 / n3)
-    ])
+    return np.array(
+        [
+            (n1 * edge2_dims[0] - n2 * edge1_dims[0]) * (1.0 / n3),
+            (n1 * edge2_dims[1] - n2 * edge1_dims[1]) * (1.0 / n3),
+        ]
+    )
 
 
 def remove_adjacent_duplicates(items, check_wraparound=True, epsilon=EPSILON):
@@ -297,13 +325,14 @@ def remove_adjacent_duplicates(items, check_wraparound=True, epsilon=EPSILON):
     Returns:
         (list): a list with all adjacent duplicates removed
     """
+
     def get_dist_sq(from_index, to_index):
         dist_sq = 0
         if isinstance(items[from_index], list):
             for j in range(len(items[from_index])):
-                dist_sq += (items[to_index][j] - items[from_index][j])**2
+                dist_sq += (items[to_index][j] - items[from_index][j]) ** 2
         else:
-            dist_sq += (items[to_index] - items[from_index])**2
+            dist_sq += (items[to_index] - items[from_index]) ** 2
         return dist_sq
 
     if isinstance(items, np.ndarray):
@@ -346,41 +375,9 @@ def in_edge_divider(clip_edge: np.ndarray, subject_point: np.ndarray):
     assert subject_point.shape[0] == 2, "subject_point must have shape 2 x 1"
 
     clip_point_start, clip_point_end = clip_edge[0], clip_edge[1]
-    return (clip_point_end[0] - clip_point_start[0]) * \
-        (subject_point[1] - clip_point_start[1]) >= \
-        (clip_point_end[1] - clip_point_start[1]) * \
-        (subject_point[0] - clip_point_start[0])
-
-
-def compute_intersection_2d(edge1: np.ndarray, edge2: np.ndarray):
-    """
-    Given two edges, computes the intersection point of the two edges.  Return None if the two edges are parallel
-    (i.e., if they don't intersect) or if either edge has no length (i.e., the same point repeated).
-
-    edge1 (iterable of two points with two floats): one edge to compute the intersection of
-    edge2 (iterable of two points with two floats): another edge to compute the intersection of
-    """
-    edge1 = np.array(edge1) if type(edge1) == list else edge1
-    edge2 = np.array(edge2) if type(edge2) == list else edge2
-
-    assert edge1.shape[1] == 2 and edge1.shape[0] >= 2, "edge1 must have shape N x 2"
-    assert edge2.shape[1] == 2 and edge2.shape[0] >= 2, "edge2 must have shape N x 2"
-
-    edge1_start, edge1_end = edge1[0], edge1[-1]
-    edge2_start, edge2_end = edge2[0], edge2[-1]
-    if np.all(edge1_start == edge1_end) or np.all(edge2_start == edge2_end):
-        return None
-    edge1_dims = [edge1_start[0] - edge1_end[0], edge1_start[1] - edge1_end[1]]
-    edge2_dims = [edge2_start[0] - edge2_end[0], edge2_start[1] - edge2_end[1]]
-    n1 = edge1_start[0] * edge1_end[1] - edge1_start[1] * edge1_end[0]
-    n2 = edge2_start[0] * edge2_end[1] - edge2_start[1] * edge2_end[0]
-    n3 = edge1_dims[0] * edge2_dims[1] - edge1_dims[1] * edge2_dims[0]
-    if math.isclose(n3, 0, abs_tol=EPSILON):
-        return None
-    return np.array([
-        (n1 * edge2_dims[0] - n2 * edge1_dims[0]) * (1.0 / n3),
-        (n1 * edge2_dims[1] - n2 * edge1_dims[1]) * (1.0 / n3)
-    ])
+    return (clip_point_end[0] - clip_point_start[0]) * (subject_point[1] - clip_point_start[1]) >= (
+        clip_point_end[1] - clip_point_start[1]
+    ) * (subject_point[0] - clip_point_start[0])
 
 
 def clip_line_2d(clip_poly: np.ndarray, subject_line: np.ndarray):
@@ -467,22 +464,29 @@ def snap_to_image_boundary(uv_px, image_width_px, image_height_px, tolerance=1e-
         return []
     if type(uv_px[0]) == list:
         return [
-            snap_to_image_boundary(px, image_width_px, image_height_px,
-                                   tolerance=tolerance, inside_and_out=inside_and_out)
+            snap_to_image_boundary(
+                px,
+                image_width_px,
+                image_height_px,
+                tolerance=tolerance,
+                inside_and_out=inside_and_out,
+            )
             for px in uv_px
         ]
     uv_px[0] = 0.0 if uv_px[0] < 0 and uv_px[0] >= -tolerance else uv_px[0]
     if inside_and_out:
-        in_width_border = \
-            uv_px[0] > (image_width_px - 1.0 - tolerance) and  uv_px[0] <= (image_width_px - 1.0 + tolerance)
+        in_width_border = uv_px[0] > (image_width_px - 1.0 - tolerance) and uv_px[0] <= (
+            image_width_px - 1.0 + tolerance
+        )
     else:
-        in_width_border = uv_px[0] > (image_width_px - 1.0) and  uv_px[0] <= (image_width_px - 1.0 + tolerance)
+        in_width_border = uv_px[0] > (image_width_px - 1.0) and uv_px[0] <= (image_width_px - 1.0 + tolerance)
     uv_px[0] = image_width_px - 1.0 if in_width_border else uv_px[0]
     uv_px[1] = 0.0 if uv_px[1] < 0 and uv_px[1] >= -tolerance else uv_px[1]
     if inside_and_out:
-        in_height_border = \
-            uv_px[1] > (image_height_px - 1.0 - tolerance) and  uv_px[1] <= (image_height_px - 1.0 + tolerance)
+        in_height_border = uv_px[1] > (image_height_px - 1.0 - tolerance) and uv_px[1] <= (
+            image_height_px - 1.0 + tolerance
+        )
     else:
-        in_height_border = uv_px[1] > (image_height_px - 1.0) and  uv_px[1] <= (image_height_px - 1.0 + tolerance)
+        in_height_border = uv_px[1] > (image_height_px - 1.0) and uv_px[1] <= (image_height_px - 1.0 + tolerance)
     uv_px[1] = image_height_px - 1.0 if in_height_border else uv_px[1]
     return uv_px

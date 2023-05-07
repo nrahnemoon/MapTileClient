@@ -36,25 +36,33 @@ TILE_CACHE_DIRS = {
     GoogleMapsMapType.HybridTerrain: os.path.join(CACHE_DIR, "hybrid_terrain_tiles"),
     GoogleMapsMapType.Satellite: os.path.join(CACHE_DIR, "satellite_tiles"),
     GoogleMapsMapType.Terrain: os.path.join(CACHE_DIR, "terrain_tiles"),
-    GoogleMapsMapType.Hybrid: os.path.join(CACHE_DIR, "hybrid_tiles")
+    GoogleMapsMapType.Hybrid: os.path.join(CACHE_DIR, "hybrid_tiles"),
 }
-TILE_BASE_URLS = {
-    map_type: f"https://mt1.google.com/vt/lyrs={map_type.value}"
-    for map_type in GoogleMapsMapType
-}
+TILE_BASE_URLS = {map_type: f"https://mt1.google.com/vt/lyrs={map_type.value}" for map_type in GoogleMapsMapType}
 for cache_dir in [CACHE_DIR] + list(TILE_CACHE_DIRS.values()):
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
 
 
 class GoogleMapsBaseMap(BaseMap):
-
-    def __init__(self, map_type, latitude_deg, longitude_deg, zoom=20,
-                 load_from_cache=True, save_to_cache=True):
+    def __init__(
+        self,
+        map_type,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
         GoogleMapsBaseMap.TILE_BASE_URL = TILE_BASE_URLS[map_type]
         GoogleMapsBaseMap.TILE_CACHE_DIR = TILE_CACHE_DIRS[map_type]
-        super().__init__(latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+        super().__init__(
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
 
     @property
     @abc.abstractmethod
@@ -71,42 +79,114 @@ class GoogleMapsBaseMap(BaseMap):
 
 
 class GoogleMapsRoadMap(GoogleMapsBaseMap):
-    def __init__(self, latitude_deg, longitude_deg, zoom=20,
-                 load_from_cache=True, save_to_cache=True):
-        super().__init__(GoogleMapsMapType.Road, latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            GoogleMapsMapType.Road,
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
 
 
 class GoogleMapsStandardMap(GoogleMapsBaseMap):
-    def __init__(self, latitude_deg, longitude_deg, zoom=20,
-                 load_from_cache=True, save_to_cache=True):
-        super().__init__(GoogleMapsMapType.Standard, latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            GoogleMapsMapType.Standard,
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
 
 
 class GoogleMapsHybridTerrainMap(GoogleMapsBaseMap):
-    def __init__(self, latitude_deg, longitude_deg, zoom=20,
-                 load_from_cache=True, save_to_cache=True):
-        super().__init__(GoogleMapsMapType.HybridTerrain, latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            GoogleMapsMapType.HybridTerrain,
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
 
 
 class GoogleMapsSatelliteMap(GoogleMapsBaseMap):
-    def __init__(self, latitude_deg, longitude_deg, zoom=20,
-                 load_from_cache=True, save_to_cache=True):
-        super().__init__(GoogleMapsMapType.Satellite, latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            GoogleMapsMapType.Satellite,
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
 
 
 class GoogleMapsTerrainMap(GoogleMapsBaseMap):
-    def __init__(self, latitude_deg, longitude_deg, zoom=20,
-                 load_from_cache=True, save_to_cache=True):
-        super().__init__(GoogleMapsMapType.Terrain, latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            GoogleMapsMapType.Terrain,
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
 
 
 class GoogleMapsHybridMap(GoogleMapsBaseMap):
-    def __init__(self, latitude_deg, longitude_deg, zoom=20,
-                 load_from_cache=True, save_to_cache=True):
-        super().__init__(GoogleMapsMapType.Hybrid, latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            GoogleMapsMapType.Hybrid,
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )

@@ -5,7 +5,6 @@ from map_tile_client.api._base_api import BaseAPI
 
 
 class AppleMapsAPI(BaseAPI):
-
     def __init__(self):
         super().__init__()
 

@@ -19,7 +19,7 @@ class PropertyRadarMapType(Enum):
 CACHE_DIR = os.path.join(list(map_tile_client.cache.__path__)[0], "property_radar")
 TILE_CACHE_DIRS = {
     PropertyRadarMapType.Street: os.path.join(CACHE_DIR, "street_tile"),
-    PropertyRadarMapType.Parcel: os.path.join(CACHE_DIR, "parcel_tiles")
+    PropertyRadarMapType.Parcel: os.path.join(CACHE_DIR, "parcel_tiles"),
 }
 for cache_dir in [CACHE_DIR] + list(TILE_CACHE_DIRS.values()):
     if not os.path.exists(cache_dir):
@@ -27,29 +27,51 @@ for cache_dir in [CACHE_DIR] + list(TILE_CACHE_DIRS.values()):
 
 
 class PropertyRadarStreetMap(BaseMap):
-
     TILE_CACHE_DIR = TILE_CACHE_DIRS[PropertyRadarMapType.Street]
     TILE_BASE_URL = "https://prn-cdn-c.propertyradar.com/t/propertyType"
 
-    def __init__(self, latitude_deg, longitude_deg, zoom=20, load_from_cache=True, save_to_cache=True):
-        super().__init__(latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
 
     def get_tile_url(self, x, y):
         return f"{PropertyRadarStreetMap.TILE_BASE_URL}/{self.zoom}/{x}/{y}.png"
 
 
 class PropertyRadarParcelMap(BaseMap):
-
     TILE_CACHE_DIR = TILE_CACHE_DIRS[PropertyRadarMapType.Parcel]
     TILE_BASE_URL = "https://prn-cdn-b.propertyradar.com/t/parcelBounds"
 
-    def __init__(self, latitude_deg, longitude_deg, zoom=20, multithread=True,
-                 load_from_cache=True, save_to_cache=True):
-        super().__init__(latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        multithread=True,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
         self.multithread = multithread
-        self.enclosing_tile_dims = [0, 0, 0, 0] # Left, Top, Right, Bottom
+        self.enclosing_tile_dims = [0, 0, 0, 0]  # Left, Top, Right, Bottom
         self._init_parcel_tiles()  # Set self.num_tiles_expand
 
     def get_tile_url(self, x, y):
@@ -60,7 +82,7 @@ class PropertyRadarParcelMap(BaseMap):
         mono_map = cv2.inRange(mono_map, np.array([0, 0, 0]), np.array([0, 0, 0]))
         mono_map_mask = np.zeros(tuple((np.array(mono_map.shape) + 2)), np.uint8)
         property_center = (
-            np.array(self.origin_uv_px) \
+            np.array(self.origin_uv_px)
             + np.array([255 * self.enclosing_tile_dims[0], 255 * self.enclosing_tile_dims[1]])
         ).tolist()
         cv2.floodFill(mono_map, mono_map_mask, [int(p) for p in property_center], 128)
@@ -92,7 +114,7 @@ class PropertyRadarParcelMap(BaseMap):
                 mono_map[:, 0],  # Left
                 mono_map[0, :],  # Top
                 mono_map[:, -1],  # Right
-                mono_map[-1, :]  # Bottom
+                mono_map[-1, :],  # Bottom
             ]
             for i in range(4):
                 if not complete[i] and all(sides[i] == 0):

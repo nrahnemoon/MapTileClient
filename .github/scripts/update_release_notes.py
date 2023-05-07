@@ -13,12 +13,13 @@ Example:
 import sys
 import datetime
 
+
 def update_release_notes(version, description):
-    with open('README.md', 'r') as f:
+    with open("README.md", "r") as f:
         readme_contents = f.readlines()
 
     # Get current date in the required format
-    current_date = datetime.date.today().strftime('%Y-%m-%d')
+    current_date = datetime.date.today().strftime("%Y-%m-%d")
 
     # Construct the new release note line
     release_note = f"\n*{version}* ({current_date}) {description}\n"
@@ -52,8 +53,9 @@ def update_release_notes(version, description):
     readme_contents.insert(last_release_note_index + 1, release_note)
 
     # Write the updated contents back to the README.md file
-    with open('README.md', 'w') as f:
+    with open("README.md", "w") as f:
         f.writelines(readme_contents)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

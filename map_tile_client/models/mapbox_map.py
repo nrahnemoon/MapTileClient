@@ -14,13 +14,12 @@ from enum import Enum
 import mapbox_vector_tile
 import os
 from PIL import Image, ImageDraw
-from random import randint
 import requests
 
 from map_tile_client.api.mapbox_api import MapBoxAPI
 import map_tile_client.cache
 from map_tile_client.models._base_map import BaseMap
-from map_tile_client.utils import color_utils, geometry_utils, tilemap_utils
+from map_tile_client.utils import color_utils, geometry_utils
 
 
 MAPBOX_API = MapBoxAPI()
@@ -31,31 +30,42 @@ class MapBoxMapType(Enum):
 
 
 CACHE_DIR = os.path.join(list(map_tile_client.cache.__path__)[0], "mapbox")
-TILE_CACHE_DIRS = {
-    MapBoxMapType.VMap: os.path.join(CACHE_DIR, "vmap")
-}
+TILE_CACHE_DIRS = {MapBoxMapType.VMap: os.path.join(CACHE_DIR, "vmap")}
 for cache_dir in [CACHE_DIR] + list(TILE_CACHE_DIRS.values()):
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
 
 
 class MapBoxVMap(BaseMap):
-
     TILE_CACHE_DIR = TILE_CACHE_DIRS[MapBoxMapType.VMap]
     TILE_BASE_URL = "https://api.mapbox.com/v4/mapbox.mapbox-streets-v8"
 
-    def __init__(self, latitude_deg, longitude_deg, zoom=20, load_from_cache=True, save_to_cache=True):
-        super().__init__(latitude_deg, longitude_deg, zoom=zoom,
-                         load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+    def __init__(
+        self,
+        latitude_deg,
+        longitude_deg,
+        zoom=20,
+        load_from_cache=True,
+        save_to_cache=True,
+    ):
+        super().__init__(
+            latitude_deg,
+            longitude_deg,
+            zoom=zoom,
+            load_from_cache=load_from_cache,
+            save_to_cache=save_to_cache,
+        )
         self.roads = {}
 
     def load_tiles(self, tile_keys, multithread=True):
-        for (x_delta, y_delta) in tile_keys:
+        for x_delta, y_delta in tile_keys:
             self.load_tile(x_delta, y_delta, multithread=multithread)
 
     def get_vmap_url(self, x, y, zoom):
-        road_url = f"{MapBoxVMap.TILE_BASE_URL}/{zoom}/{x}/{y}.vector.pbf" \
+        road_url = (
+            f"{MapBoxVMap.TILE_BASE_URL}/{zoom}/{x}/{y}.vector.pbf"
             f"?sku=101sHi7zTy5Qn&access_token={MAPBOX_API.get_access_token()}"
+        )
         return road_url
 
     def get_roads(self, x_delta, y_delta):
@@ -67,10 +77,7 @@ class MapBoxVMap(BaseMap):
         self.roads[(x_delta, y_delta)] = {}
         if "road" in vtile:
             for feature in vtile["road"]["features"]:
-                if (
-                    feature["properties"]["class"] != "street"
-                    and feature["properties"]["type"] != "secondary"
-                ):
+                if feature["properties"]["class"] != "street" and feature["properties"]["type"] != "secondary":
                     continue
                 if feature["geometry"]["type"] == "LineString":
                     coordinates = [feature["geometry"]["coordinates"]]
@@ -82,12 +89,15 @@ class MapBoxVMap(BaseMap):
                     # By default, the road is returned in a tile of size 4096x4096
                     # Scale down to the conventional 256x256
                     coordinates[i] = [
-                        (256.0 * (float(p[0]) / 4096.0),
-                         256.0 * (1 - (float(p[1]) / 4096.0)))
+                        (
+                            256.0 * (float(p[0]) / 4096.0),
+                            256.0 * (1 - (float(p[1]) / 4096.0)),
+                        )
                         for p in coordinates[i]
                     ]
-                street_name = feature["properties"]["name"] if "name" in feature["properties"] \
-                                                            else feature["properties"]["type"]
+                street_name = (
+                    feature["properties"]["name"] if "name" in feature["properties"] else feature["properties"]["type"]
+                )
                 if street_name not in self.roads[(x_delta, y_delta)]:
                     self.roads[(x_delta, y_delta)][street_name] = []
                 self.roads[(x_delta, y_delta)][street_name] = self.roads[(x_delta, y_delta)][street_name] + coordinates
@@ -109,8 +119,8 @@ class MapBoxVMap(BaseMap):
             else:
                 self.tiles[(x_delta, y_delta)] = Image.new("RGB", (256, 256))
                 tile_draw = ImageDraw.Draw(self.tiles[(x_delta, y_delta)])
-                image_bounds = geometry_utils.get_image_bounds(256, 256)
                 # Uncomment this line to add a white border around each tile
+                # image_bounds = geometry_utils.get_image_bounds(256, 256)
                 # for image_edge_px in zip(image_bounds[:-1], image_bounds[1:]):
                 #     tile_draw.line([tuple(px) for px in image_edge_px], fill=(255, 255, 255), width=2)
                 for street_name, road_edges_px in self.get_roads(x_delta, y_delta).items():
@@ -119,9 +129,13 @@ class MapBoxVMap(BaseMap):
                         if len(road_uv_px) == 0:
                             continue
                         road_uv_px = geometry_utils.snap_to_image_boundary(
-                            road_uv_px, 256.0, 256.0, tolerance=1.0, inside_and_out=True)
+                            road_uv_px, 256.0, 256.0, tolerance=1.0, inside_and_out=True
+                        )
                         print(road_uv_px)
-                        tile_draw.line([(int(x[0]), int(x[1])) for x in road_uv_px],
-                                       fill=color_utils.get_color(street_name), width=8)
+                        tile_draw.line(
+                            [(int(x[0]), int(x[1])) for x in road_uv_px],
+                            fill=color_utils.get_color(street_name),
+                            width=8,
+                        )
                 if self.save_to_cache:
                     self.tiles[(x_delta, y_delta)].save(cache_path)

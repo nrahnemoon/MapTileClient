@@ -2,11 +2,11 @@
 Abstract class to provide generic API load and processing functionality.
 """
 import abc
+import json
 import functools
 
 
 class BaseAPI:
-
     NUM_RETRY_ATTEMPTS = 2
 
     def __init__(self):
@@ -14,7 +14,7 @@ class BaseAPI:
 
     @abc.abstractmethod
     def get_access_token(self, reload=True):
-        raise NotImplemented
+        raise NotImplementedError
 
     @staticmethod
     def process_response(response):
@@ -29,8 +29,7 @@ class BaseAPI:
             (dict): the response in dictionary format
         """
         if response.status_code != 200:
-            raise Exception("Errror hitting API.\n"
-                            f"\tStatus code: {response.status_code},\n\tData: {response.text}")
+            raise Exception("Errror hitting API.\n" f"\tStatus code: {response.status_code},\n\tData: {response.text}")
         return json.load(response.text)
 
     def retry(function):
@@ -41,6 +40,6 @@ class BaseAPI:
                     return function(*args, **kwargs)
                 except Exception as e:
                     args[0].get_access_token(reload=True)
-                    print(f"[{attempt}/{BaseAPI.NUM_RETRY_ATTEMPTS}] Call failed, retrying."
-                          f"\n\tException: {e}")
+                    print(f"[{attempt}/{BaseAPI.NUM_RETRY_ATTEMPTS}] Call failed, retrying." f"\n\tException: {e}")
+
         return retry_function
