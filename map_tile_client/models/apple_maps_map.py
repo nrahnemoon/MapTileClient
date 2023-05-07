@@ -24,6 +24,7 @@ class AppleMapsMapType(Enum):
     Standard = "Standard"
 
 
+APPLE_STANDARD_MAPS_BUILDINGS_COLOR = np.array([233, 233, 226])
 APPLE_MAPS_API = AppleMapsAPI()
 CACHE_DIR = os.path.join(list(map_tile_client.cache.__path__)[0], "apple_maps")
 TILE_CACHE_DIRS = {
@@ -76,3 +77,11 @@ class AppleMapsStandardMap(AppleMapsBaseMap):
                  load_from_cache=True, save_to_cache=True):
         super().__init__(AppleMapsMapType.Standard, latitude_deg, longitude_deg, zoom=zoom,
                          load_from_cache=load_from_cache, save_to_cache=save_to_cache)
+
+    def get_mono_map(self):
+        apple_maps_mono_map = cv2.inRange(
+            np.array(self.get_map()), APPLE_STANDARD_MAPS_BUILDINGS_COLOR - np.array([1, 1, 1]),
+            APPLE_STANDARD_MAPS_BUILDINGS_COLOR + np.array([1, 1, 1])
+        )
+        apple_maps_mono_map = 255 - apple_maps_mono_map  # Apple maps need to invert
+        return Image.fromarray(apple_maps_mono_map)
