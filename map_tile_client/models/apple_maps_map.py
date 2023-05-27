@@ -117,6 +117,10 @@ class AppleMapsStandardMap(AppleMapsBaseMap):
             save_to_cache=save_to_cache,
         )
 
+    # from map_tile_client.models.apple_maps_map import AppleMapsStandardMap
+    # apple_maps_map = AppleMapsStandardMap(37.33981343865369, -122.04560815516787)
+    # apple_maps_map.expand_border(2)
+    # apple_maps_map.get_mono_map().show()
     def get_mono_map(self):
         apple_maps_mono_map = cv2.inRange(
             np.array(self.get_map()),
