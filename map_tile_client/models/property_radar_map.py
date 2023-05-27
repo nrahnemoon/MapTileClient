@@ -96,6 +96,29 @@ class PropertyRadarParcelMap(BaseMap):
                 enclosing_tiles.append((x_delta, y_delta))
         return enclosing_tiles
 
+    def get_parcel_contours_px(self):
+        property_radar_parcel_mono_map = property_radar_parcel_map.get_mono_map()
+        parcel_contours_px = list(cv2.findContours(np.array(property_radar_parcel_mono_map), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0])
+
+        simplified_parcel_contours_px = []
+        for i, parcel_contour_px in enumerate(parcel_contours_px):
+            if len(parcel_contour_px) < 3:
+                continue
+            parcel_contour_px = [[x, y] for x, y in Polygon(parcel_contour_px[:, 0].tolist()).simplify(2.0).exterior.coords]
+            simplified_parcel_contours_px.append(parcel_contour_px)
+        return simplified_parcel_contours_px
+
+    def get_parcel_contours_latlon_deg(self):
+        parcel_contours_latlon_deg = []
+        for parcel_contour_px in self.get_parcel_contours_px():
+            parcel_contour_latlon_deg = []
+            for u_px, v_px in parcel_contour_px:
+                tile_x = property_radar_parcel_map.origin_tile_x - property_radar_parcel_map.enclosing_tile_dims[0] + int(u_px / 255)
+                tile_y = property_radar_parcel_map.origin_tile_y - property_radar_parcel_map.enclosing_tile_dims[1] + int(v_px / 255)
+                parcel_contour_latlon_deg.append(list(get_lat_lon_for_tile_px(tile_x, tile_y, u_px % 255, v_px % 255, property_radar_parcel_map.zoom)))
+            parcel_contours_latlon_deg.append(parcel_contour_latlon_deg)
+        return parcel_contours_latlon_deg
+
     def _init_parcel_tiles(self):
         complete = [False, False, False, False]  # Left, Top, Right, Bottom
 
