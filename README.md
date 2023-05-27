@@ -1,6 +1,6 @@
 ## Overview
 
-VERSION: 0.4.4
+VERSION: 0.4.5
 
 API Client for accessing data from Google Maps, Apple Maps, OpenStreetMaps and PropertyRadar maps.
 
@@ -123,3 +123,5 @@ poetry install
 *0.4.3* (2023-05-27) Fix imports
 
 *0.4.4* (2023-05-27) Update Google Maps Standard Map to get roof mono image
+
+*0.4.5* (2023-05-27) Mono map roof for google amps
