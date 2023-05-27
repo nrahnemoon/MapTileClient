@@ -97,8 +97,8 @@ class PropertyRadarParcelMap(BaseMap):
         return enclosing_tiles
 
     def get_parcel_contours_px(self):
-        property_radar_parcel_mono_map = property_radar_parcel_map.get_mono_map()
-        parcel_contours_px = list(cv2.findContours(np.array(property_radar_parcel_mono_map), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0])
+        mono_map = self.get_mono_map()
+        parcel_contours_px = list(cv2.findContours(np.array(mono_map), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0])
 
         simplified_parcel_contours_px = []
         for i, parcel_contour_px in enumerate(parcel_contours_px):
@@ -113,9 +113,9 @@ class PropertyRadarParcelMap(BaseMap):
         for parcel_contour_px in self.get_parcel_contours_px():
             parcel_contour_latlon_deg = []
             for u_px, v_px in parcel_contour_px:
-                tile_x = property_radar_parcel_map.origin_tile_x - property_radar_parcel_map.enclosing_tile_dims[0] + int(u_px / 255)
-                tile_y = property_radar_parcel_map.origin_tile_y - property_radar_parcel_map.enclosing_tile_dims[1] + int(v_px / 255)
-                parcel_contour_latlon_deg.append(list(get_lat_lon_for_tile_px(tile_x, tile_y, u_px % 255, v_px % 255, property_radar_parcel_map.zoom)))
+                tile_x = self.origin_tile_x - self.enclosing_tile_dims[0] + int(u_px / 255)
+                tile_y = self.origin_tile_y - self.enclosing_tile_dims[1] + int(v_px / 255)
+                parcel_contour_latlon_deg.append(list(get_lat_lon_for_tile_px(tile_x, tile_y, u_px % 255, v_px % 255, self.zoom)))
             parcel_contours_latlon_deg.append(parcel_contour_latlon_deg)
         return parcel_contours_latlon_deg
 
