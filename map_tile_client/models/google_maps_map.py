@@ -138,7 +138,7 @@ class GoogleMapsStandardMap(GoogleMapsBaseMap):
             epsilon = 0.01 * cv2.arcLength(contour, True)
             approx = cv2.approxPolyDP(contour, epsilon, True)
             cv2.drawContours(smooth_image, [approx], -1, (255), thickness=cv2.FILLED)
-        return Image.fromarray(smooth_image)
+        return Image.fromarray(cv2.bitwise_not(smooth_image))
 
 
 class GoogleMapsHybridTerrainMap(GoogleMapsBaseMap):
