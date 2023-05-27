@@ -1,6 +1,6 @@
 ## Overview
 
-VERSION: 0.4.2
+VERSION: 0.4.3
 
 API Client for accessing data from Google Maps, Apple Maps, OpenStreetMaps and PropertyRadar maps.
 
@@ -119,3 +119,5 @@ poetry install
 *0.4.1* (2023-05-27) Add get lat lon and get parcel px to PropertyRadarParcelMap
 
 *0.4.2* (2023-05-27) Bugfix in get latlon and contour px
+
+*0.4.3* (2023-05-27) Fix imports
