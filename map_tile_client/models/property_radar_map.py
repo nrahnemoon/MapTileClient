@@ -52,7 +52,7 @@ class PropertyRadarStreetMap(BaseMap):
 
 class PropertyRadarParcelMap(BaseMap):
     TILE_CACHE_DIR = TILE_CACHE_DIRS[PropertyRadarMapType.Parcel]
-    TILE_BASE_URL = "https://prn-cdn-b.propertyradar.com/t/parcelBounds"
+    TILE_BASE_URL = "https://tile-cdn-b.propertyradar.com/t/parcelBounds"
 
     def __init__(
         self,
