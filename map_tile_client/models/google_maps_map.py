@@ -10,10 +10,12 @@ google_maps_map.expand_border(4)
 google_maps_map.get_map().show()
 ```
 """
-
 import abc
+import cv2
 from enum import Enum
+import numpy as np
 import os
+from PIL import Image
 
 import map_tile_client.cache
 from map_tile_client.models._base_map import BaseMap
@@ -29,6 +31,7 @@ class GoogleMapsMapType(Enum):
     Hybrid = "y"
 
 
+GOOGLE_STANDARD_MAPS_ROOF_COLOR = np.array([241, 241, 241])
 CACHE_DIR = os.path.join(list(map_tile_client.cache.__path__)[0], "google_maps")
 TILE_CACHE_DIRS = {
     GoogleMapsMapType.Road: os.path.join(CACHE_DIR, "road_tiles"),
@@ -114,6 +117,28 @@ class GoogleMapsStandardMap(GoogleMapsBaseMap):
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
         )
+
+    # from map_tile_client.models.google_maps_map import GoogleMapsStandardMap
+    # google_maps_map = GoogleMapsStandardMap(37.33981343865369, -122.04560815516787)
+    # google_maps_map.expand_border(2)
+    # google_maps_map.get_roofs_mono_map().show()
+    def get_roofs_mono_map(self):
+        mono_map = cv2.inRange(
+            np.array(self.get_map()),
+            GOOGLE_STANDARD_MAPS_ROOF_COLOR - np.array([1, 1, 1]),
+            GOOGLE_STANDARD_MAPS_ROOF_COLOR + np.array([1, 1, 1]),
+        )
+        kernel = np.ones((3, 3), np.uint8)
+        opening = cv2.morphologyEx(mono_map, cv2.MORPH_OPEN, kernel)
+        closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+
+        contours, _ = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        smooth_image = np.zeros_like(mono_map)
+        for contour in contours:
+            epsilon = 0.01 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            cv2.drawContours(smooth_image, [approx], -1, (255), thickness=cv2.FILLED)
+        return Image.fromarray(smooth_image)
 
 
 class GoogleMapsHybridTerrainMap(GoogleMapsBaseMap):
