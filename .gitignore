@@ -1,1 +1,3 @@
 map_tile_client/cache/*
+
+*__pycache__*

@@ -6,9 +6,11 @@ from enum import Enum
 import numpy as np
 import os
 from PIL import Image
+from shapely.geometry import Polygon
 
 import map_tile_client.cache
 from map_tile_client.models._base_map import BaseMap
+from map_tile_client.utils.tilemap_utils import get_lat_lon_for_tile_px
 
 
 class PropertyRadarMapType(Enum):
@@ -54,6 +56,8 @@ class PropertyRadarParcelMap(BaseMap):
     TILE_CACHE_DIR = TILE_CACHE_DIRS[PropertyRadarMapType.Parcel]
     TILE_BASE_URL = "https://tile-cdn-b.propertyradar.com/t/parcelBounds"
 
+    # from map_tile_client.models.property_radar_map import PropertyRadarParcelMap
+    # property_radar_parcel_map = PropertyRadarParcelMap(37.241426, -121.888323)
     def __init__(
         self,
         latitude_deg,
@@ -77,6 +81,9 @@ class PropertyRadarParcelMap(BaseMap):
     def get_tile_url(self, x, y):
         return f"{PropertyRadarParcelMap.TILE_BASE_URL}/{self.zoom}/{x}/{y}.png"
 
+    # from map_tile_client.models.property_radar_map import PropertyRadarParcelMap
+    # property_radar_parcel_map = PropertyRadarParcelMap(37.241426, -121.888323)
+    # property_radar_parcel_map.get_mono_map()
     def get_mono_map(self):
         mono_map = np.array(self.get_map())
         mono_map = cv2.inRange(mono_map, np.array([0, 0, 0]), np.array([0, 0, 0]))
@@ -96,6 +103,9 @@ class PropertyRadarParcelMap(BaseMap):
                 enclosing_tiles.append((x_delta, y_delta))
         return enclosing_tiles
 
+    # from map_tile_client.models.property_radar_map import PropertyRadarParcelMap
+    # property_radar_parcel_map = PropertyRadarParcelMap(37.241426, -121.888323)
+    # property_radar_parcel_map.get_parcel_contours_px()
     def get_parcel_contours_px(self):
         mono_map = self.get_mono_map()
         parcel_contours_px = list(cv2.findContours(np.array(mono_map), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0])
@@ -108,6 +118,9 @@ class PropertyRadarParcelMap(BaseMap):
             simplified_parcel_contours_px.append(parcel_contour_px)
         return simplified_parcel_contours_px
 
+    # from map_tile_client.models.property_radar_map import PropertyRadarParcelMap
+    # property_radar_parcel_map = PropertyRadarParcelMap(37.241426, -121.888323)
+    # property_radar_parcel_map.get_parcel_contours_latlon_deg()
     def get_parcel_contours_latlon_deg(self):
         parcel_contours_latlon_deg = []
         for parcel_contour_px in self.get_parcel_contours_px():
