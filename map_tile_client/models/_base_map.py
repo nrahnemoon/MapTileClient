@@ -26,6 +26,7 @@ class BaseMap:
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         self.latitude_deg, self.longitude_deg, self.zoom = (
             latitude_deg,
@@ -40,8 +41,10 @@ class BaseMap:
         self.load_map_lock = threading.Lock()
         self.map = Image.new("RGB", (0, 0))
         self.map_tiles = []  # (x_delta, y_delta) of tiles loaded into map
-        self.tile_load_queue = Queue()
-        self._start_tile_load_threads()
+        self.multithread = multithread
+        if multithread:
+            self.tile_load_queue = Queue()
+            self._start_tile_load_threads()
 
     @property
     @abc.abstractmethod
@@ -54,7 +57,7 @@ class BaseMap:
         return NotImplementedError
 
     @classmethod
-    def from_map(cls, other_map: BaseMap, load_tiles=True, multithread=True):
+    def from_map(cls, other_map: BaseMap, load_tiles=True):
         curr_map = cls(
             other_map.latitude_deg,
             other_map.longitude_deg,
@@ -63,7 +66,7 @@ class BaseMap:
             other_map.save_to_cache,
         )
         if load_tiles:
-            curr_map.load_tiles(other_map.get_tile_keys(), multithread=multithread)
+            curr_map.load_tiles(other_map.get_tile_keys())
         return curr_map
 
     def get_tile_cache_path(self, x, y):
@@ -86,13 +89,13 @@ class BaseMap:
     def _load_tile_from_queue(self, load_tile_queue):
         while True:
             (x_delta, y_delta) = load_tile_queue.get()
-            self.load_tile(x_delta, y_delta, multithread=False)
+            self.load_tile(x_delta, y_delta)
             self.num_tiles_loading -= 1
 
-    def load_tile(self, x_delta, y_delta, multithread=True):
+    def load_tile(self, x_delta, y_delta):
         if (x_delta, y_delta) in self.tiles:
             return
-        if multithread:
+        if self.multithread:
             self.num_tiles_loading += 1
             self.load_map_lock.acquire()
             self.tile_load_queue.put((x_delta, y_delta))
@@ -108,11 +111,11 @@ class BaseMap:
                 if self.save_to_cache:
                     self.tiles[(x_delta, y_delta)].save(cache_path)
 
-    def load_tiles(self, tile_keys, multithread=True):
+    def load_tiles(self, tile_keys):
         for x_delta, y_delta in tile_keys:
-            self.load_tile(x_delta, y_delta, multithread=multithread)
+            self.load_tile(x_delta, y_delta)
 
-    def expand_border(self, num_tiles_expand, multithread=True):
+    def expand_border(self, num_tiles_expand):
         num_tiles_expand = int(num_tiles_expand)
         num_tiles_width_px, num_tiles_height_px = BaseMap.get_dimensions_px(self.tiles.keys())
         tiles_top_left_x_delta, tiles_top_left_y_delta = BaseMap.get_top_left_delta(self.tiles.keys())

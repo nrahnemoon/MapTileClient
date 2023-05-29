@@ -73,8 +73,8 @@ class PropertyRadarParcelMap(BaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
-        self.multithread = multithread
         self.enclosing_tile_dims = [0, 0, 0, 0]  # Left, Top, Right, Bottom
         self._init_parcel_tiles()  # Set self.num_tiles_expand
 
@@ -137,11 +137,11 @@ class PropertyRadarParcelMap(BaseMap):
 
         def load_parcel_map_border():
             for x_delta in range(-self.enclosing_tile_dims[0], self.enclosing_tile_dims[2] + 1):
-                self.load_tile(x_delta, -self.enclosing_tile_dims[1], multithread=self.multithread)
-                self.load_tile(x_delta, self.enclosing_tile_dims[3], multithread=self.multithread)
+                self.load_tile(x_delta, -self.enclosing_tile_dims[1])
+                self.load_tile(x_delta, self.enclosing_tile_dims[3])
             for y_delta in range(-self.enclosing_tile_dims[1] + 1, self.enclosing_tile_dims[3]):
-                self.load_tile(-self.enclosing_tile_dims[0], y_delta, multithread=self.multithread)
-                self.load_tile(self.enclosing_tile_dims[2], y_delta, multithread=self.multithread)
+                self.load_tile(-self.enclosing_tile_dims[0], y_delta)
+                self.load_tile(self.enclosing_tile_dims[2], y_delta)
 
         def update_complete_vars():
             nonlocal complete

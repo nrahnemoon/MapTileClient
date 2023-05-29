@@ -47,6 +47,7 @@ class MapBoxVMap(BaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=True
     ):
         super().__init__(
             latitude_deg,
@@ -54,12 +55,13 @@ class MapBoxVMap(BaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
         self.roads = {}
 
-    def load_tiles(self, tile_keys, multithread=True):
+    def load_tiles(self, tile_keys):
         for x_delta, y_delta in tile_keys:
-            self.load_tile(x_delta, y_delta, multithread=multithread)
+            self.load_tile(x_delta, y_delta)
 
     def get_vmap_url(self, x, y, zoom):
         road_url = (
@@ -103,10 +105,10 @@ class MapBoxVMap(BaseMap):
                 self.roads[(x_delta, y_delta)][street_name] = self.roads[(x_delta, y_delta)][street_name] + coordinates
         return self.roads[(x_delta, y_delta)]
 
-    def load_tile(self, x_delta, y_delta, multithread=True):
+    def load_tile(self, x_delta, y_delta):
         if (x_delta, y_delta) in self.tiles:
             return
-        if multithread:
+        if self.multithread:
             self.num_tiles_loading += 1
             self.load_map_lock.acquire()
             self.tile_load_queue.put((x_delta, y_delta))
