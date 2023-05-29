@@ -156,7 +156,7 @@ class PropertyRadarParcelMap(BaseMap):
                 if not complete[i] and all(sides[i] == 0):
                     complete[i] = True
 
-        self.load_tile(0, 0, multithread=False)
+        self.load_tile(0, 0)
         update_complete_vars()
         while not all(complete):
             for i in range(4):
