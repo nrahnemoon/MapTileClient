@@ -61,9 +61,10 @@ class BaseMap:
         curr_map = cls(
             other_map.latitude_deg,
             other_map.longitude_deg,
-            other_map.zoom,
-            other_map.load_from_cache,
-            other_map.save_to_cache,
+            zoom=other_map.zoom,
+            load_from_cache=other_map.load_from_cache,
+            save_to_cache=other_map.save_to_cache,
+            multithread=other_map.multithread
         )
         if load_tiles:
             curr_map.load_tiles(other_map.get_tile_keys())
@@ -117,7 +118,8 @@ class BaseMap:
                         loaded_from_cache = False
             if not loaded_from_cache:
                 tile_url = self.get_tile_url(tile_x, tile_y)
-                self.tiles[(x_delta, y_delta)] = Image.open(BytesIO(requests.get(tile_url).content))
+                response = requests.get(tile_url)
+                self.tiles[(x_delta, y_delta)] = Image.open(BytesIO(response.content))
                 if self.save_to_cache:
                     self.tiles[(x_delta, y_delta)].save(cache_path)
 

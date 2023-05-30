@@ -56,6 +56,7 @@ class GoogleMapsBaseMap(BaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         GoogleMapsBaseMap.TILE_BASE_URL = TILE_BASE_URLS[map_type]
         GoogleMapsBaseMap.TILE_CACHE_DIR = TILE_CACHE_DIRS[map_type]
@@ -65,6 +66,7 @@ class GoogleMapsBaseMap(BaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
     @property
@@ -89,6 +91,7 @@ class GoogleMapsRoadMap(GoogleMapsBaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             GoogleMapsMapType.Road,
@@ -97,6 +100,7 @@ class GoogleMapsRoadMap(GoogleMapsBaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
 
@@ -108,6 +112,7 @@ class GoogleMapsStandardMap(GoogleMapsBaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             GoogleMapsMapType.Standard,
@@ -116,6 +121,7 @@ class GoogleMapsStandardMap(GoogleMapsBaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
     # from map_tile_client.models.google_maps_map import GoogleMapsStandardMap
@@ -149,6 +155,7 @@ class GoogleMapsHybridTerrainMap(GoogleMapsBaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             GoogleMapsMapType.HybridTerrain,
@@ -157,6 +164,7 @@ class GoogleMapsHybridTerrainMap(GoogleMapsBaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
 
@@ -168,6 +176,7 @@ class GoogleMapsSatelliteMap(GoogleMapsBaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             GoogleMapsMapType.Satellite,
@@ -176,6 +185,7 @@ class GoogleMapsSatelliteMap(GoogleMapsBaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
 
@@ -187,6 +197,7 @@ class GoogleMapsTerrainMap(GoogleMapsBaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             GoogleMapsMapType.Terrain,
@@ -195,6 +206,7 @@ class GoogleMapsTerrainMap(GoogleMapsBaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
 
@@ -206,6 +218,7 @@ class GoogleMapsHybridMap(GoogleMapsBaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             GoogleMapsMapType.Hybrid,
@@ -214,4 +227,5 @@ class GoogleMapsHybridMap(GoogleMapsBaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )

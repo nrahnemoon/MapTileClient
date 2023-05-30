@@ -51,6 +51,7 @@ class AppleMapsBaseMap(BaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         AppleMapsBaseMap.TILE_BASE_URL = TILE_BASE_URLS[map_type]
         AppleMapsBaseMap.TILE_CACHE_DIR = TILE_CACHE_DIRS[map_type]
@@ -60,6 +61,7 @@ class AppleMapsBaseMap(BaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
     @property
@@ -88,6 +90,7 @@ class AppleMapsSatelliteMap(AppleMapsBaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             AppleMapsMapType.Satellite,
@@ -96,6 +99,7 @@ class AppleMapsSatelliteMap(AppleMapsBaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
 
@@ -107,6 +111,7 @@ class AppleMapsStandardMap(AppleMapsBaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             AppleMapsMapType.Standard,
@@ -115,6 +120,7 @@ class AppleMapsStandardMap(AppleMapsBaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
     # from map_tile_client.models.apple_maps_map import AppleMapsStandardMap

@@ -63,6 +63,7 @@ class PropertyRadarParcelMap(BaseMap):
         latitude_deg,
         longitude_deg,
         zoom=20,
+        extra_border_tiles=0,
         multithread=True,
         load_from_cache=True,
         save_to_cache=True,
@@ -76,7 +77,7 @@ class PropertyRadarParcelMap(BaseMap):
             multithread=multithread
         )
         self.enclosing_tile_dims = [0, 0, 0, 0]  # Left, Top, Right, Bottom
-        self._init_parcel_tiles()  # Set self.num_tiles_expand
+        self._init_parcel_tiles(extra_border_tiles=extra_border_tiles)  # Set self.num_tiles_expand
 
     def get_tile_url(self, x, y):
         return f"{PropertyRadarParcelMap.TILE_BASE_URL}/{self.zoom}/{x}/{y}.png"
@@ -132,7 +133,7 @@ class PropertyRadarParcelMap(BaseMap):
             parcel_contours_latlon_deg.append(parcel_contour_latlon_deg)
         return parcel_contours_latlon_deg
 
-    def _init_parcel_tiles(self):
+    def _init_parcel_tiles(self, extra_border_tiles=0):
         complete = [False, False, False, False]  # Left, Top, Right, Bottom
 
         def load_parcel_map_border():
@@ -164,3 +165,8 @@ class PropertyRadarParcelMap(BaseMap):
                     self.enclosing_tile_dims[i] += 1
             load_parcel_map_border()
             update_complete_vars()
+
+        for i in range(4):
+            self.enclosing_tile_dims[i] += extra_border_tiles
+        load_parcel_map_border()
+        update_complete_vars()
