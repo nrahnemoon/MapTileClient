@@ -103,9 +103,19 @@ class BaseMap:
         else:
             tile_x, tile_y = self.origin_tile_x + x_delta, self.origin_tile_y + y_delta
             cache_path = self.get_tile_cache_path(tile_x, tile_y)
+            loaded_from_cache = False
             if self.load_from_cache and os.path.exists(cache_path):
-                self.tiles[(x_delta, y_delta)] = Image.open(cache_path)
-            else:
+                if os.path.getsize(cache_path) == 0:
+                    os.remove(cache_path)
+                else:
+                    self.tiles[(x_delta, y_delta)] = Image.open(cache_path)
+                    loaded_from_cache = True
+                    try:
+                        self.tiles[(x_delta, y_delta)].load()
+                    except OSError as e:
+                        os.remove(cache_path)
+                        loaded_from_cache = False
+            if not loaded_from_cache:
                 tile_url = self.get_tile_url(tile_x, tile_y)
                 self.tiles[(x_delta, y_delta)] = Image.open(BytesIO(requests.get(tile_url).content))
                 if self.save_to_cache:
