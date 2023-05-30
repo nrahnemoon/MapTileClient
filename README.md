@@ -1,6 +1,6 @@
 ## Overview
 
-VERSION: 0.4.8
+VERSION: 0.4.9
 
 API Client for accessing data from Google Maps, Apple Maps, OpenStreetMaps and PropertyRadar maps.
 
@@ -131,3 +131,5 @@ poetry install
 *0.4.7* (2023-05-29) Fix multithread
 
 *0.4.8* (2023-05-29) Multithread bugfix
+
+*0.4.9* (2023-05-30) Fix caching
