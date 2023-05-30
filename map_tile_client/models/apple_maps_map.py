@@ -34,7 +34,7 @@ TILE_CACHE_DIRS = {
     AppleMapsMapType.Standard: os.path.join(CACHE_DIR, "standard_tiles"),
 }
 TILE_BASE_URLS = {
-    AppleMapsMapType.Satellite: "https://sat-cdn2.apple-mapkit.com/tile?style=7&size=1&scale=1&v=9262",
+    AppleMapsMapType.Satellite: "https://sat-cdn3.apple-mapkit.com/tile?style=7&size=1&scale=1&v=9451",
     AppleMapsMapType.Standard: "https://cdn2.apple-mapkit.com/ti/tile?style=0&size=1&scale=1",
 }
 for cache_dir in [CACHE_DIR] + list(TILE_CACHE_DIRS.values()):
