@@ -30,7 +30,7 @@ for cache_dir in [CACHE_DIR] + list(TILE_CACHE_DIRS.values()):
 
 class PropertyRadarStreetMap(BaseMap):
     TILE_CACHE_DIR = TILE_CACHE_DIRS[PropertyRadarMapType.Street]
-    TILE_BASE_URL = "https://prn-cdn-c.propertyradar.com/t/propertyType"
+    TILE_BASE_URL = "https://tile-cdn-b.propertyradar.com/t/propertyType"
 
     def __init__(
         self,
