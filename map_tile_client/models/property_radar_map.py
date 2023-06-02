@@ -39,6 +39,7 @@ class PropertyRadarStreetMap(BaseMap):
         zoom=20,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             latitude_deg,
@@ -46,6 +47,7 @@ class PropertyRadarStreetMap(BaseMap):
             zoom=zoom,
             load_from_cache=load_from_cache,
             save_to_cache=save_to_cache,
+            multithread=multithread
         )
 
     def get_tile_url(self, x, y):
@@ -64,9 +66,9 @@ class PropertyRadarParcelMap(BaseMap):
         longitude_deg,
         zoom=20,
         extra_border_tiles=0,
-        multithread=True,
         load_from_cache=True,
         save_to_cache=True,
+        multithread=False
     ):
         super().__init__(
             latitude_deg,
